@@ -89,8 +89,37 @@ export async function submitVote(pollId: string, optionIndex: number) {
     const {
       data: { user },
     } = await supabase.auth.getUser();
-    // Optionally require login to vote
-    // if (!user) return { error: 'You must be logged in to vote.' };
+
+    // Fetch poll to validate optionIndex
+    const { data: poll, error: pollError } = await supabase
+      .from("polls")
+      .select("options")
+      .eq("id", pollId)
+      .single();
+    if (pollError || !poll) {
+      return { error: "Poll not found." };
+    }
+    const options: string[] = Array.isArray(poll.options) ? poll.options : [];
+    if (!Number.isInteger(optionIndex) || optionIndex < 0 || optionIndex >= options.length) {
+      return { error: "Invalid option selected." };
+    }
+
+    // Prevent duplicate votes for authenticated users
+    if (user?.id) {
+      const { data: existingVote, error: voteCheckError } = await supabase
+        .from("votes")
+        .select("id")
+        .eq("poll_id", pollId)
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (voteCheckError) {
+        return { error: voteCheckError.message };
+      }
+      if (existingVote) {
+        return { error: "You have already voted in this poll." };
+      }
+    }
+
     const { error } = await supabase.from("votes").insert([
       {
         poll_id: pollId,

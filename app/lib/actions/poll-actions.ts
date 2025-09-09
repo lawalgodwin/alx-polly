@@ -7,8 +7,14 @@ import { revalidatePath } from "next/cache";
 export async function createPoll(formData: FormData) {
   try {
     const supabase = await createClient();
-    const question = formData.get("question") as string;
-    const options = formData.getAll("options").filter(Boolean) as string[];
+    // Sanitize and dedupe input
+    let question = (formData.get("question") as string | undefined) ?? "";
+    question = question.trim();
+    let options = (formData.getAll("options") as string[])
+      .map(opt => (typeof opt === "string" ? opt.trim() : ""))
+      .filter(opt => opt.length > 0);
+    // Remove duplicates
+    options = Array.from(new Set(options));
     if (!question || options.length < 2) {
       return { error: "Please provide a question and at least two options." };
     }
@@ -116,8 +122,14 @@ export async function deletePoll(id: string) {
 export async function updatePoll(pollId: string, formData: FormData) {
   try {
     const supabase = await createClient();
-    const question = formData.get("question") as string;
-    const options = formData.getAll("options").filter(Boolean) as string[];
+    // Sanitize and dedupe input
+    let question = (formData.get("question") as string | undefined) ?? "";
+    question = question.trim();
+    let options = (formData.getAll("options") as string[])
+      .map(opt => (typeof opt === "string" ? opt.trim() : ""))
+      .filter(opt => opt.length > 0);
+    // Remove duplicates
+    options = Array.from(new Set(options));
     if (!question || options.length < 2) {
       return { error: "Please provide a question and at least two options." };
     }

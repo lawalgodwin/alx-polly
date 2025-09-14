@@ -22,21 +22,23 @@ export default function PollCreateForm() {
     }
   };
 
+  const handlePollCreation = async (formData: FormData) => {
+    setError(null);
+    setSuccess(false);
+    const res = await createPoll(formData);
+    if (res?.error) {
+      setError(res.error);
+    } else {
+      setSuccess(true);
+      setTimeout(() => {
+        window.location.href = "/polls";
+      }, 1200);
+    }
+  };
+
   return (
     <form
-      action={async (formData) => {
-        setError(null);
-        setSuccess(false);
-        const res = await createPoll(formData);
-        if (res?.error) {
-          setError(res.error);
-        } else {
-          setSuccess(true);
-          setTimeout(() => {
-            window.location.href = "/polls";
-          }, 1200);
-        }
-      }}
+      action={handlePollCreation}
       className="space-y-6 max-w-md mx-auto"
     >
       <div>

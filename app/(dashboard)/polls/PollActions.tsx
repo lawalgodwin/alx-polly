@@ -5,7 +5,7 @@ import { useAuth } from "@/app/lib/context/auth-context";
 import { Button } from "@/components/ui/button";
 import { deletePoll } from "@/app/lib/actions/poll-actions";
 import React, { useState, useEffect } from "react";
-import QRCodeCanvas from "@/components/ui/qrcode-canvas";
+import QRCodeCanvas from "@/components/QRCodeCanvas";
 
 interface Poll {
   id: string;
